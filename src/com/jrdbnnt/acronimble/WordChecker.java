@@ -5,16 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
-
 import android.content.res.AssetManager;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.view.textservice.SuggestionsInfo;
 
 public class WordChecker {
-	ArrayList<String> words;
-	AssetManager am;
-	SuggestionsInfo si;
+	private static ArrayList<String> words;
+	private static Boolean hasLoaded;
+	private static AssetManager am;
+	private final int NUM_WORDS = 178300;
 	
 	WordChecker(AssetManager am) {
 		this.am = am;
@@ -22,22 +19,30 @@ public class WordChecker {
 	}
 	
 	private void init() {
-		words = new ArrayList<String>();
+		this.words = new ArrayList<String>(this.NUM_WORDS);
+		this.hasLoaded = false;
+		
+		//LOAD WORDLIST
 		try {
-			Scanner inFile = new Scanner(am.open("words.txt"));
+			final Scanner inFile = new Scanner(am.open("words.txt"));
 			
 			//populate wordlist
-			while(inFile.hasNext()) {
-				words.add(inFile.next());
-				inFile.nextLine();
-			}
-			inFile.close();
-			
+			Thread populate = new Thread() {
+				@Override
+				public void run() {
+					while(inFile.hasNext()) {				
+						words.add(inFile.next());
+						inFile.nextLine();
+					}
+					hasLoaded = true;
+					//System.out.println("LOADED!");
+					inFile.close();
+				}
+			};
+			populate.start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		
 	}
 	
 	public boolean isWord(String w) {
@@ -46,10 +51,7 @@ public class WordChecker {
 		for(int i = 0; (i < this.words.size()) && (result == false); i++) {
 			if(w.equals(this.words.get(i)))
 				result = true;
-				
-			//System.out.println("COMPARING '" + this.words.get(i) + "' TO '" + w + "' ... " + result);
 		}
-		
 		return result;
 	}
 	
