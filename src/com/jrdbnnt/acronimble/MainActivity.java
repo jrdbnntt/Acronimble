@@ -1,27 +1,23 @@
 package com.jrdbnnt.acronimble;
 
+
 import java.util.ArrayList;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.AssetManager;
-import android.view.Menu;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.util.Log;
 import android.view.View;
 
 public class MainActivity extends Activity implements View.OnClickListener {
-
-	private TextView tvResult, tvFormedWord;
-	private EditText etInput;
-	private Button bSubmit;
-	private WordChecker wc;
-	private AssetManager am;
 	
-	private Card testCard; 
-	private ArrayList<String> usedWords;
+	private Button bStart;
 	
+	private static ArrayList<String> usedCards;		//cards not to show bc already seen
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,106 +26,62 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		
 		init();
 		
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		
 	}
 	
 	private void init() {
-		this.tvResult = (TextView) this.findViewById(R.id.tvResult);
-		this.tvFormedWord = (TextView) this.findViewById(R.id.tvFormedWord);
-		this.etInput = (EditText) this.findViewById(R.id.etInput);
-		this.bSubmit = (Button) this.findViewById(R.id.bSubmit);
-		//Dictionary.getInstance().ensureLoaded(getResources());
-		this.am = this.getAssets();
-		this.wc = new WordChecker(am);
+		this.bStart = (Button) this.findViewById(R.id.bStart);
+		this.usedCards = new ArrayList<String>();
 		
-		this.testCard = new Card("dog");
-		this.usedWords = new ArrayList<String>();
+		//load words here, only have to once in app
+		WordChecker.getInstance().load(this);
+		CardChecker.getInstance().load(this);
 		
-		
-		this.tvFormedWord.setText(this.testCard.getFormed());
-		this.tvResult.setText("");
-		
-		
-		this.bSubmit.setOnClickListener(this);
+		this.bStart.setOnClickListener(this);
 	}
 
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch(v.getId()) {
-		case R.id.bSubmit: 
-			submit();
+		case R.id.bStart: 
+			start();
 			break;
 		}
 	}
 	
-	
 	/**
-	 * Checks word for card
-	 * @author Jared
-	 */
-	private void submit() {
-		String text = this.etInput.getText().toString();
-		text = text.toUpperCase();
-
-		if(!this.testCard.isFormed()) {
-			if(!this.wc.isWord(text)) {
-				this.addLog("FAIL: '" + text + "' != WORD");
-			} else if(!this.isNewWord(text)) {
-				this.addLog("FAIL: '" + text + "' HAS BEEN USED");
-			} else if(!this.testCard.isLetter(text)) {
-				this.addLog("FAIL: '" + text + "' HAS INCORRECT LETTER");
-			} else {
-				this.usedWords.add(text);
-				
-				this.addLog("SUCCESS: '" + text + "'");
-				
-				if(this.testCard.isFormed()) {
-					this.addLog("*** WORD COMPLETED ***");
-					this.usedWords.add(this.testCard.getWord());
-				}
-				
-				//updated formed text
-				this.tvFormedWord.setText(this.testCard.getFormed());
-			}
-		} else {
-			this.addLog("Error: Word alread formed");
-		}
-
-		//reset input
-		this.etInput.getText().clear();
-	}
-	
-	/**
-	 * Appends entry to log, adding a newline
+	 * Starts card activity, passes word and imgID with intent
 	 * 
 	 * @author Jared
 	 */
-	private void addLog(String entry) {
-		String currentLog = this.tvResult.getText().toString();
+	private void start() {
+		Bundle basket = new Bundle();
+		Intent a = new Intent(this, CardActivity.class);
 		
-		currentLog += entry + "\n";
+		//reset usedCards when they have all been used
 		
-		this.tvResult.setText(currentLog);
+		
+		//NOTE: word MUST EQUAL pic file name (excluding extention), underscores instead of spaces
+		String word = CardChecker.getInstance().pullCard(this.usedCards); // pickCard();	//word for card
+		this.usedCards.add(word);
+		basket.putString("word", word);
+		
+		//remove any spaces for img filenames
+		word = word.replaceAll("\\s","_").toLowerCase();
+		
+		Log.e("IMGID", word);
+		
+		int imgID = this.getResources()
+						.getIdentifier(word, "drawable", 
+								this.getPackageName());		//corresponding card img 
+		
+		
+		basket.putInt("imgID", imgID);
+		a.putExtras(basket);
+		
+		//start activity
+		this.startActivity(a);
 	}
 	
-	/**
-	 * Checks to see if word has already been used
-	 * @author Jared
-	 */
-	private boolean isNewWord(String w) {
-		boolean result = true;
-		
-		for(int i = 0; (i < this.usedWords.size()) && result; i++) {
-			result = !w.equals(this.usedWords.get(i));
-		}
-		
-		return result;
-	}
 }
