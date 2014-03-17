@@ -93,7 +93,7 @@ public class CardActivity extends Activity implements View.OnClickListener {
 			this.currentLetter++;
 			
 			//skip any spaces
-			while(!this.isFormed() && this.word.charAt(currentLetter + 1) == ' ')
+			while(!this.isFormed() && this.word.charAt(currentLetter) == ' ')
 				currentLetter++;
 			
 			return true;
