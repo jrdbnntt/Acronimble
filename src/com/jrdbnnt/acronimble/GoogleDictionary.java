@@ -1,3 +1,4 @@
+package com.jrdbnnt.acronimble;
 /*
 /*
  * Copyright (C) 2009 The Android Open Source Project

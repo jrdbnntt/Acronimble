@@ -4,16 +4,15 @@
  */
 package com.jrdbnnt.acronimble;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Scanner;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 
 public class WordChecker {
-	private static ArrayList<String> words;
+	private static HashMap<Integer,String> words;
 	private Boolean hasLoaded;
 	private Boolean isLoading;
 	private AssetManager am;
@@ -25,7 +24,7 @@ public class WordChecker {
 		init();
 	}
 	private void init() {
-		this.words = new ArrayList<String>(this.NUM_WORDS);
+		this.words = new HashMap<Integer,String>(this.NUM_WORDS);
 		this.hasLoaded = false;
 		this.isLoading = false;
 	}
@@ -47,24 +46,31 @@ public class WordChecker {
 	 * @author Jared
 	 */
 	public void load(Context c) {
+		
+		
 		if(!hasLoaded && !isLoading) {
 			this.am = c.getAssets();
 
 			try {
 				final Scanner inFile = new Scanner(am.open("words.txt"));
-
+				
 				//populate wordlist
 				Thread populate = new Thread() {
 					@Override
 					public void run() {
-						while(inFile.hasNext()) {				
-							words.add(inFile.next());
-							inFile.nextLine();
+						String word;
+						System.out.println("STARTED LOADING");
+						
+						while(inFile.hasNext()) {
+							word = inFile.nextLine();
+							words.put(word.hashCode(),word);
 						}
 						isLoading = false;
 						hasLoaded = true;
 						//System.out.println("LOADED!");
 						inFile.close();
+						
+						System.out.println("FINISHED LOADING");
 					}
 				};
 				this.isLoading = true;
@@ -76,6 +82,7 @@ public class WordChecker {
 	}	
 
 	public boolean isWord(String w) {
+		/*
 		boolean result = false;
 
 		for(int i = 0; (i < this.words.size()) && (result == false); i++) {
@@ -83,6 +90,12 @@ public class WordChecker {
 				result = true;
 		}
 		return result;
+		*/
+		
+		if(words.get(w.hashCode()) != null)
+			return true;
+		else
+			return false;
 	}
 	
 	/**

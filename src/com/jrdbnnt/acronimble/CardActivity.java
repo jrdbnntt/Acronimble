@@ -11,7 +11,6 @@ package com.jrdbnnt.acronimble;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
