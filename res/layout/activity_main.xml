@@ -10,10 +10,23 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
+    <TextView
+        android:id="@+id/tvLoadDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading... 0%"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <Button
-        android:id="@+id/bStart"
+        android:id="@+id/bStartButton"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:text="START" />
+        android:layout_height="wrap_content"
+        android:text="Start Button Game" />
+
+    <Button
+        android:id="@+id/bStartTyping"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Typing Game" />
 
 </LinearLayout>

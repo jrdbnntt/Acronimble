@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/LinearLayout1"
+    android:id="@+id/bStartButton"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -11,7 +11,7 @@
     tools:context=".MainActivity" >
 
     <TextView
-        android:id="@+id/tvFormedWord"
+        android:id="@+id/tvTypeGameFormedWord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -19,7 +19,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <ImageView
-        android:id="@+id/ivImage"
+        android:id="@+id/ivTypeGameImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -27,7 +27,7 @@
         android:src="@drawable/doge" />
 
     <EditText
-        android:id="@+id/etInput"
+        android:id="@+id/etTypeGameInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -54,7 +54,7 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/tvResult"
+                android:id="@+id/tvTypeGameResult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="&lt;result>"

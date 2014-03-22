@@ -32,19 +32,29 @@ public final class R {
         public static final int spongebob=0x7f020008;
     }
     public static final class id {
-        public static final int LinearLayout1=0x7f080000;
-        public static final int action_settings=0x7f080008;
-        public static final int bStart=0x7f080007;
-        public static final int bSubmit=0x7f080004;
-        public static final int etInput=0x7f080003;
-        public static final int ivImage=0x7f080002;
-        public static final int scrollView1=0x7f080005;
-        public static final int tvFormedWord=0x7f080001;
-        public static final int tvResult=0x7f080006;
+        public static final int LinearLayout1=0x7f08000e;
+        public static final int action_settings=0x7f080011;
+        public static final int bButtonGameC1=0x7f080002;
+        public static final int bButtonGameC2=0x7f080003;
+        public static final int bButtonGameC3=0x7f080004;
+        public static final int bButtonGameC4=0x7f080005;
+        public static final int bStartButton=0x7f080007;
+        public static final int bStartTyping=0x7f080010;
+        public static final int bSubmit=0x7f08000b;
+        public static final int etTypeGameInput=0x7f08000a;
+        public static final int ivButtonGameImage=0x7f080001;
+        public static final int ivTypeGameImage=0x7f080009;
+        public static final int scrollView1=0x7f08000c;
+        public static final int tvButtonGameFormedWord=0x7f080000;
+        public static final int tvButtonGameResult=0x7f080006;
+        public static final int tvLoadDisplay=0x7f08000f;
+        public static final int tvTypeGameFormedWord=0x7f080008;
+        public static final int tvTypeGameResult=0x7f08000d;
     }
     public static final class layout {
-        public static final int activity_card=0x7f030000;
-        public static final int activity_main=0x7f030001;
+        public static final int activity_button_card=0x7f030000;
+        public static final int activity_card=0x7f030001;
+        public static final int activity_main=0x7f030002;
     }
     public static final class menu {
         public static final int main=0x7f070000;

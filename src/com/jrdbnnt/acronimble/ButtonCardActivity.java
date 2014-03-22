@@ -11,14 +11,18 @@ package com.jrdbnnt.acronimble;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class CardActivity extends Activity implements View.OnClickListener {
+public class ButtonCardActivity extends Activity implements View.OnClickListener {
 	private String word;					//word that must be formed
 	private int imgID;						//R.drawable ID of image
 	private int currentLetter;				//current letter needed
@@ -26,13 +30,13 @@ public class CardActivity extends Activity implements View.OnClickListener {
 	
 	private ImageView ivImage; 
 	private TextView tvResult, tvFormedWord;
-	private EditText etInput;
-	private Button bSubmit;
-		
+	private Button[] bChoices;
+	private final int NUM_CHOICES = 4;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_card);
+		setContentView(R.layout.activity_button_card);
 		
 		init();
 		getData();
@@ -43,15 +47,24 @@ public class CardActivity extends Activity implements View.OnClickListener {
 		this.tvFormedWord.setText(getFormed());
 		this.tvResult.setText("");
 		
-		this.bSubmit.setOnClickListener(this);
 	}
 	
 	private void init() {
-		this.tvResult = (TextView) this.findViewById(R.id.tvTypeGameResult);
-		this.tvFormedWord = (TextView) this.findViewById(R.id.tvTypeGameFormedWord);
-		this.etInput = (EditText) this.findViewById(R.id.etTypeGameInput);
-		this.bSubmit = (Button) this.findViewById(R.id.bSubmit);
-		this.ivImage = (ImageView) this.findViewById(R.id.ivTypeGameImage);
+		this.tvResult = (TextView) this.findViewById(R.id.tvButtonGameResult);
+		this.tvFormedWord = (TextView) this.findViewById(R.id.tvButtonGameFormedWord);
+		this.ivImage = (ImageView) this.findViewById(R.id.ivButtonGameImage);
+		
+		this.bChoices = new Button[NUM_CHOICES];
+		this.bChoices[0] = (Button) this.findViewById(R.id.bButtonGameC1);
+		this.bChoices[1] = (Button) this.findViewById(R.id.bButtonGameC2);
+		this.bChoices[2] = (Button) this.findViewById(R.id.bButtonGameC3);
+		this.bChoices[3] = (Button) this.findViewById(R.id.bButtonGameC4);
+		
+		//add listeneres
+		for(int i = 0; i < this.NUM_CHOICES; i++) {
+			this.bChoices[i].setOnClickListener(this);
+		}
+		
 		this.usedWords = new ArrayList<String>();
 		this.currentLetter = 0;
 		
@@ -70,15 +83,6 @@ public class CardActivity extends Activity implements View.OnClickListener {
 		//img
 		this.imgID = gotBasket.getInt("imgID");
 		this.ivImage.setImageResource(this.imgID);
-	}
-	
-	@Override
-	public void onClick(View v) {
-		switch(v.getId()) {
-		case R.id.bSubmit:
-			submit();
-			break;
-		}
 	}
 	
 	/**
@@ -135,9 +139,9 @@ public class CardActivity extends Activity implements View.OnClickListener {
 	/**
 	 * Checks word for card
 	 * @author Jared
+	 * @param the answer given
 	 */
-	private void submit() {
-		String text = this.etInput.getText().toString();
+	private void submit(String text) {
 		text = text.toUpperCase();
 
 		if(!this.isFormed()) {
@@ -165,9 +169,6 @@ public class CardActivity extends Activity implements View.OnClickListener {
 			this.addLog("Error: Word alread formed");
 			//TODO: go to another activity, sending stats with an intent
 		}
-
-		//reset input
-		this.etInput.getText().clear();
 	}
 	
 	/**
@@ -197,5 +198,51 @@ public class CardActivity extends Activity implements View.OnClickListener {
 		return result;
 	}
 
-	
+
+	public class CustomAdapter extends BaseAdapter {
+		private Context mContext;
+		private int numChoices = 4;
+
+	    public CustomAdapter(Context c) {
+	        mContext = c;
+	    }
+
+	    public int getCount() {
+	        return numChoices;
+	    }
+
+	    public Object getItem(int position) {
+	        return null;
+	    }
+
+	    public long getItemId(int position) {
+	        return 0;
+	    }
+
+	    // create a new ImageView for each item referenced by the Adapter
+	    public View getView(int position, View convertView, ViewGroup parent) {
+	        ImageView imageView;
+	        Button bChoice;
+	        if (convertView == null) {  // if it's not recycled, initialize some attributes
+	            
+	            bChoice = new Button(mContext);
+	            bChoice.setLayoutParams(new GridView.LayoutParams(85,85));
+	            bChoice.setPadding(2, 2, 2, 2);
+	            bChoice.setText("<Choice " + position + ">");
+	            
+	        } else {
+	            bChoice = (Button) convertView;
+	        }
+
+	        return bChoice;
+	    }
+
+	}
+
+
+	@Override
+	public void onClick(View v) {
+		//handle choice
+	}
+
 }

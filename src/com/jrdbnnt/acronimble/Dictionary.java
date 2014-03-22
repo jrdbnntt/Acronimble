@@ -4,29 +4,40 @@
  */
 package com.jrdbnnt.acronimble;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.io.IOException;
 import java.util.Scanner;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.text.format.Time;
+import android.util.Log;
 
-public class WordChecker {
-	private static HashMap<Integer,String> words;
+public class Dictionary {
+	private static HashMap<Integer,String> words;		//list of words w/ key = word.hashCode()
+	private static ArrayList<Integer> keys;					//list keys
 	private Boolean hasLoaded;
 	private Boolean isLoading;
 	private AssetManager am;
 	private final int NUM_WORDS = 178300;		//appox, is a little under this
+	private Random rand;
 
-	private static final WordChecker sInstance = new WordChecker();
+	private static final Dictionary sInstance = new Dictionary();
 
-	private WordChecker() {
+	private Dictionary() {
 		init();
 	}
 	private void init() {
-		this.words = new HashMap<Integer,String>(this.NUM_WORDS);
+		Dictionary.words = new HashMap<Integer,String>(this.NUM_WORDS);
+		Dictionary.keys = new ArrayList<Integer>(this.NUM_WORDS);
 		this.hasLoaded = false;
 		this.isLoading = false;
+		
+		Time t = new Time();
+		t.setToNow();
+		this.rand = new Random(t.toMillis(false));
 	}
 	
 	/**
@@ -34,8 +45,8 @@ public class WordChecker {
 	 * 
 	 * @author Jared
 	 */
-	public static WordChecker getInstance() {
-		return sInstance;
+	public static Dictionary getInstance() {
+		return Dictionary.sInstance;
 	}
 
 	/**
@@ -46,8 +57,6 @@ public class WordChecker {
 	 * @author Jared
 	 */
 	public void load(Context c) {
-		
-		
 		if(!hasLoaded && !isLoading) {
 			this.am = c.getAssets();
 
@@ -59,18 +68,24 @@ public class WordChecker {
 					@Override
 					public void run() {
 						String word;
+						Integer key;
 						System.out.println("STARTED LOADING");
 						
 						while(inFile.hasNext()) {
 							word = inFile.nextLine();
-							words.put(word.hashCode(),word);
+							key = word.hashCode();
+							words.put(key,word);
+							keys.add(key);
 						}
 						isLoading = false;
 						hasLoaded = true;
-						//System.out.println("LOADED!");
 						inFile.close();
 						
 						System.out.println("FINISHED LOADING");
+						
+						//for(int i = 0; i < 100; i++){
+						//	System.out.println("random_word : " + getRandomWord());
+						//}
 					}
 				};
 				this.isLoading = true;
@@ -92,10 +107,20 @@ public class WordChecker {
 		return result;
 		*/
 		
-		if(words.get(w.hashCode()) != null)
+		if(Dictionary.words.get(w.hashCode()) != null)
 			return true;
 		else
 			return false;
+	}
+	
+	/**
+	 * Chooses a random word from the words using a random key from keys.
+	 * @author Jared
+	 * @param w
+	 * @return random word out of words
+	 */
+	public String getRandomWord() {
+		return (Dictionary.words.get(Dictionary.keys.get(rand.nextInt(Dictionary.keys.size()))));
 	}
 	
 	/**
