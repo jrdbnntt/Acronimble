@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.text.format.Time;
 import android.util.Log;
+import android.widget.TextView;
 
 public class Dictionary {
 	private static HashMap<Integer,String> words;		//list of words w/ key = word.hashCode()
@@ -23,7 +24,13 @@ public class Dictionary {
 	private AssetManager am;
 	private final int NUM_WORDS = 178300;		//appox, is a little under this
 	private Random rand;
-
+	
+	private static int[][] wordLocations;		//holds indexes of [wordLength][letter a-z]
+	private final int MAX_WORD_SIZE = 15;
+	private final int MIN_WORD_SIZE = 2;		//actual min - 1
+	private final String ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	private final int NUM_LETTERS = 26;
+	
 	private static final Dictionary sInstance = new Dictionary();
 
 	private Dictionary() {
@@ -34,6 +41,8 @@ public class Dictionary {
 		Dictionary.keys = new ArrayList<Integer>(this.NUM_WORDS);
 		this.hasLoaded = false;
 		this.isLoading = false;
+		
+		Dictionary.wordLocations = new int[MAX_WORD_SIZE - MIN_WORD_SIZE][NUM_LETTERS];
 		
 		Time t = new Time();
 		t.setToNow();
@@ -56,10 +65,11 @@ public class Dictionary {
 	 * @param a context (use 'this' inside an activity)
 	 * @author Jared
 	 */
-	public void load(Context c) {
+	public void load(final MainActivity c) {
 		if(!hasLoaded && !isLoading) {
 			this.am = c.getAssets();
-
+			
+			
 			try {
 				final Scanner inFile = new Scanner(am.open("words.txt"));
 				
@@ -69,23 +79,51 @@ public class Dictionary {
 					public void run() {
 						String word;
 						Integer key;
+						int currentAlpha = 0;
+						char currentLetter = ' ';
+						
 						System.out.println("STARTED LOADING");
 						
-						while(inFile.hasNext()) {
+						for(int i = 0; inFile.hasNext(); ++i) {
 							word = inFile.nextLine();
 							key = word.hashCode();
-							words.put(key,word);
-							keys.add(key);
+							Dictionary.words.put(key,word);
+							Dictionary.keys.add(key);
+							
+							//set marker for where letter starts
+							if(word.charAt(0) != currentLetter) {
+								currentLetter = word.charAt(0);
+								Dictionary.wordLocations[word.length() - MIN_WORD_SIZE - 1][currentAlpha] = i;
+								++currentAlpha;
+								
+								//reset alpha if needed
+								if(currentAlpha == NUM_LETTERS) {
+									currentAlpha = 0;
+								}
+								
+								//update loading text in main
+								final int index = i;
+								c.runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										c.setLoadPercent(false, (int)((((double)index) / ((double)NUM_WORDS)) * 100));
+									}
+								});
+							}
 						}
+						//update loading text in main
+						c.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								c.setLoadPercent(true, 100);
+							}
+						});
+						
 						isLoading = false;
 						hasLoaded = true;
 						inFile.close();
 						
 						System.out.println("FINISHED LOADING");
-						
-						//for(int i = 0; i < 100; i++){
-						//	System.out.println("random_word : " + getRandomWord());
-						//}
 					}
 				};
 				this.isLoading = true;
@@ -97,16 +135,6 @@ public class Dictionary {
 	}	
 
 	public boolean isWord(String w) {
-		/*
-		boolean result = false;
-
-		for(int i = 0; (i < this.words.size()) && (result == false); i++) {
-			if(w.equals(this.words.get(i)))
-				result = true;
-		}
-		return result;
-		*/
-		
 		if(Dictionary.words.get(w.hashCode()) != null)
 			return true;
 		else
@@ -115,12 +143,27 @@ public class Dictionary {
 	
 	/**
 	 * Chooses a random word from the words using a random key from keys.
+	 * 
 	 * @author Jared
-	 * @param w
+	 * 
 	 * @return random word out of words
 	 */
-	public String getRandomWord() {
-		return (Dictionary.words.get(Dictionary.keys.get(rand.nextInt(Dictionary.keys.size()))));
+	public String getRandomWord(char correctLetter, boolean isCorrect) {
+		int correctIndex = this.ALPHA.indexOf(correctLetter);
+		int wordSize;
+		int letter = correctIndex;
+		Integer key;
+		
+		if(!isCorrect) {
+			while(letter == correctIndex)
+				letter = this.rand.nextInt(this.NUM_LETTERS);
+		}
+		
+		wordSize = this.rand.nextInt(this.MAX_WORD_SIZE - this.MIN_WORD_SIZE - 1);
+		
+		key = Dictionary.wordLocations[wordSize][letter];
+		
+		return (Dictionary.words.get(Dictionary.keys.get(key)));
 	}
 	
 	/**

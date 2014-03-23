@@ -3,22 +3,20 @@
  * TODO: make this an activity/view that manages itself
  * 
  * @author Jared
- *
  */
 
 package com.jrdbnnt.acronimble;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.format.Time;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.GridLayout;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,20 +31,37 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 	private Button[] bChoices;
 	private final int NUM_CHOICES = 4;
 	
+	private ArrayList<String> usedCards;
+	
+	private Random rand;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_button_card);
 		
 		init();
+
 		getData();
-		
-		//make it so you cant use the word later
-		this.usedWords.add(this.word);
-		
+
 		this.tvFormedWord.setText(getFormed());
 		this.tvResult.setText("");
-		
+		this.currentLetter = 0;
+
+		//get random
+		Time t = new Time();
+		t.setToNow();
+		this.rand = new Random(t.toMillis(false));
+
+		//add listeners and populate choices
+		for(int i = 0; i < this.NUM_CHOICES; i++) {
+			this.bChoices[i].setOnClickListener(this);
+
+		}
+		setChoices();
+
+
+
 	}
 	
 	private void init() {
@@ -60,13 +75,10 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 		this.bChoices[2] = (Button) this.findViewById(R.id.bButtonGameC3);
 		this.bChoices[3] = (Button) this.findViewById(R.id.bButtonGameC4);
 		
-		//add listeneres
-		for(int i = 0; i < this.NUM_CHOICES; i++) {
-			this.bChoices[i].setOnClickListener(this);
-		}
+		
 		
 		this.usedWords = new ArrayList<String>();
-		this.currentLetter = 0;
+		
 		
 	}
 	
@@ -79,6 +91,9 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 		//word
 		this.word = gotBasket.getString("word");
 		this.word = this.word.toUpperCase();
+		
+		//usedCards
+		this.usedCards = gotBasket.getStringArrayList("usedCards");
 		
 		//img
 		this.imgID = gotBasket.getInt("imgID");
@@ -145,13 +160,7 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 		text = text.toUpperCase();
 
 		if(!this.isFormed()) {
-			if(this.word == text) {
-				this.addLog("FAIL: '" + text + "' == GOAL");
-			} else if(!Dictionary.getInstance().isWord(text)) {
-				this.addLog("FAIL: '" + text + "' != WORD");
-			} else if(!this.isNewWord(text)) {
-				this.addLog("FAIL: '" + text + "' HAS BEEN USED");
-			} else if(!this.isLetter(text)) {
+			if(!this.isLetter(text)) {
 				this.addLog("FAIL: '" + text + "' HAS INCORRECT LETTER");
 			} else {
 				this.usedWords.add(text);
@@ -160,10 +169,15 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 				
 				if(this.isFormed()) {
 					this.addLog("*** WORD COMPLETED ***");
+					finishCard();
+				} else {
+					//get new choices
+					setChoices();
 				}
 				
 				//updated formed text
 				this.tvFormedWord.setText(this.getFormed());
+				
 			}
 		} else {
 			this.addLog("Error: Word alread formed");
@@ -199,50 +213,52 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 	}
 
 
-	public class CustomAdapter extends BaseAdapter {
-		private Context mContext;
-		private int numChoices = 4;
-
-	    public CustomAdapter(Context c) {
-	        mContext = c;
-	    }
-
-	    public int getCount() {
-	        return numChoices;
-	    }
-
-	    public Object getItem(int position) {
-	        return null;
-	    }
-
-	    public long getItemId(int position) {
-	        return 0;
-	    }
-
-	    // create a new ImageView for each item referenced by the Adapter
-	    public View getView(int position, View convertView, ViewGroup parent) {
-	        ImageView imageView;
-	        Button bChoice;
-	        if (convertView == null) {  // if it's not recycled, initialize some attributes
-	            
-	            bChoice = new Button(mContext);
-	            bChoice.setLayoutParams(new GridView.LayoutParams(85,85));
-	            bChoice.setPadding(2, 2, 2, 2);
-	            bChoice.setText("<Choice " + position + ">");
-	            
-	        } else {
-	            bChoice = (Button) convertView;
-	        }
-
-	        return bChoice;
-	    }
-
-	}
-
-
 	@Override
 	public void onClick(View v) {
-		//handle choice
+		submit(((Button) v).getText().toString());
 	}
+	
+	
+	/**
+	 * Sets choices to random words, with only one random button correct
+	 * @author Jared
+	 */
+	private void setChoices() {
+		int correctChoice = this.rand.nextInt(this.NUM_CHOICES);
 
+		for(int i = 0; i < this.NUM_CHOICES; ++i) {
+			this.bChoices[i].setText(Dictionary.getInstance().getRandomWord(this.word.charAt(currentLetter), (i == correctChoice)));
+		}
+	}
+	
+	private void finishCard() {
+		Bundle basket = new Bundle();
+		Intent a = new Intent(this, this.getClass());
+		
+		//reset usedCards when they have all been used
+		
+		//NOTE: word MUST EQUAL pic file name (excluding extention), underscores instead of spaces
+		String word = CardChecker.getInstance().pullCard(this.usedCards); // pickCard();	//word for card
+		this.usedCards.add(word);
+		
+		basket.putStringArrayList("usedCards", this.usedCards);
+		
+		basket.putString("word", word);
+		
+		//remove any spaces for img filenames
+		word = word.replaceAll("\\s","_").toLowerCase();
+		
+		Log.e("IMGID", word);
+		
+		int imgID = this.getResources()
+						.getIdentifier(word, "drawable", 
+								this.getPackageName());		//corresponding card img 
+		
+		
+		basket.putInt("imgID", imgID);
+		a.putExtras(basket);
+		
+		//start activity
+		this.startActivity(a);
+	}
 }
