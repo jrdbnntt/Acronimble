@@ -92,6 +92,7 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 		this.word = gotBasket.getString("word");
 		this.word = this.word.toUpperCase();
 		
+		
 		//usedCards
 		this.usedCards = gotBasket.getStringArrayList("usedCards");
 		
@@ -181,6 +182,7 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 			}
 		} else {
 			this.addLog("Error: Word alread formed");
+			finishCard();
 			//TODO: go to another activity, sending stats with an intent
 		}
 	}

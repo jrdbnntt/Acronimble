@@ -171,6 +171,7 @@ public class CardActivity extends Activity implements View.OnClickListener {
 			}
 		} else {
 			this.addLog("Error: Word alread formed");
+			this.finishCard();
 			//TODO: go to another activity, sending stats with an intent
 		}
 

@@ -26,6 +26,7 @@ public class Dictionary {
 	private Random rand;
 	
 	private static int[][] wordLocations;		//holds indexes of [wordLength][letter a-z]
+	private static int[][] numInLetter;			//holds number of words for given [wordlength][letter a-z]
 	private final int MAX_WORD_SIZE = 15;
 	private final int MIN_WORD_SIZE = 2;		//actual min - 1
 	private final String ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -43,6 +44,7 @@ public class Dictionary {
 		this.isLoading = false;
 		
 		Dictionary.wordLocations = new int[MAX_WORD_SIZE - MIN_WORD_SIZE][NUM_LETTERS];
+		Dictionary.numInLetter = new int[MAX_WORD_SIZE - MIN_WORD_SIZE][NUM_LETTERS];
 		
 		Time t = new Time();
 		t.setToNow();
@@ -81,6 +83,9 @@ public class Dictionary {
 						Integer key;
 						int currentAlpha = 0;
 						char currentLetter = ' ';
+						int currentSizeIndex = 0;
+						int wordsInLetter = 0;
+						
 						
 						System.out.println("STARTED LOADING");
 						
@@ -90,10 +95,26 @@ public class Dictionary {
 							Dictionary.words.put(key,word);
 							Dictionary.keys.add(key);
 							
+							++wordsInLetter;
+							
 							//set marker for where letter starts
 							if(word.charAt(0) != currentLetter) {
 								currentLetter = word.charAt(0);
-								Dictionary.wordLocations[word.length() - MIN_WORD_SIZE - 1][currentAlpha] = i;
+								currentSizeIndex = word.length() - MIN_WORD_SIZE - 1;
+								Dictionary.wordLocations[currentSizeIndex][currentAlpha] = i;
+								
+								
+								//record words in letter for PREVIOUS LETTER
+								if(!(currentSizeIndex == 0 && currentAlpha == 0)) {
+									if(currentAlpha == 0) //a
+										Dictionary.numInLetter[currentSizeIndex - 1][NUM_LETTERS - 1] = wordsInLetter;
+									else
+										Dictionary.numInLetter[currentSizeIndex][currentAlpha - 1] = wordsInLetter;
+									
+									wordsInLetter = 0;
+								}
+								
+								//get next alpha
 								++currentAlpha;
 								
 								//reset alpha if needed
@@ -111,6 +132,9 @@ public class Dictionary {
 								});
 							}
 						}
+						//update last letter
+						Dictionary.numInLetter[MAX_WORD_SIZE - MIN_WORD_SIZE - 1][NUM_LETTERS - 1] = wordsInLetter;
+						
 						//update loading text in main
 						c.runOnUiThread(new Runnable() {
 							@Override
@@ -161,7 +185,8 @@ public class Dictionary {
 		
 		wordSize = this.rand.nextInt(this.MAX_WORD_SIZE - this.MIN_WORD_SIZE - 1);
 		
-		key = Dictionary.wordLocations[wordSize][letter];
+		key = Dictionary.wordLocations[wordSize][letter] + 
+				this.rand.nextInt(Dictionary.numInLetter[wordSize][letter]);
 		
 		return (Dictionary.words.get(Dictionary.keys.get(key)));
 	}
