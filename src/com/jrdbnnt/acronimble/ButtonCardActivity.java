@@ -235,6 +235,7 @@ public class ButtonCardActivity extends Activity implements View.OnClickListener
 	
 	private void finishCard() {
 		Bundle basket = new Bundle();
+		if ()
 		Intent a = new Intent(this, this.getClass());
 		
 		//reset usedCards when they have all been used
