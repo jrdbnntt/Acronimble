@@ -11,7 +11,9 @@ package com.jrdbnnt.acronimble;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,6 +30,8 @@ public class CardActivity extends Activity implements View.OnClickListener {
 	private TextView tvResult, tvFormedWord;
 	private EditText etInput;
 	private Button bSubmit;
+	
+	private ArrayList<String> usedCards;
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,9 @@ public class CardActivity extends Activity implements View.OnClickListener {
 		//word
 		this.word = gotBasket.getString("word");
 		this.word = this.word.toUpperCase();
+		
+		//used cards
+		this.usedCards = gotBasket.getStringArrayList("usedCards");
 		
 		//img
 		this.imgID = gotBasket.getInt("imgID");
@@ -156,6 +163,7 @@ public class CardActivity extends Activity implements View.OnClickListener {
 				
 				if(this.isFormed()) {
 					this.addLog("*** WORD COMPLETED ***");
+					this.finishCard();
 				}
 				
 				//updated formed text
@@ -195,6 +203,37 @@ public class CardActivity extends Activity implements View.OnClickListener {
 		}
 		
 		return result;
+	}
+	
+	private void finishCard() {
+		Bundle basket = new Bundle();
+		Intent a = new Intent(this, this.getClass());
+		
+		//reset usedCards when they have all been used
+		
+		//NOTE: word MUST EQUAL pic file name (excluding extention), underscores instead of spaces
+		String word = CardChecker.getInstance().pullCard(this.usedCards); // pickCard();	//word for card
+		this.usedCards.add(word);
+		
+		basket.putStringArrayList("usedCards", this.usedCards);
+		
+		basket.putString("word", word);
+		
+		//remove any spaces for img filenames
+		word = word.replaceAll("\\s","_").toLowerCase();
+		
+		Log.e("IMGID", word);
+		
+		int imgID = this.getResources()
+						.getIdentifier(word, "drawable", 
+								this.getPackageName());		//corresponding card img 
+		
+		
+		basket.putInt("imgID", imgID);
+		a.putExtras(basket);
+		
+		//start activity
+		this.startActivity(a);
 	}
 
 	
