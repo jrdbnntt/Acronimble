@@ -103,8 +103,8 @@ public class CardChecker {
 		boolean good;
 		
 		//reset usedcards if they have all been used
-		//if(usedCards.size() == this.cards.size())
-		//	usedCards.clear();
+		if((usedCards.size() + 1) == this.cards.size())
+			usedCards.clear();
 		
 		//TODO: fix the fact that it crashes (gets stuck in the for loop i think) when all cards have been used
 		
@@ -122,8 +122,6 @@ public class CardChecker {
 		
 		return this.cards.get(i);
 	}
-
-
 
 	public void addCard(String cardName) {
 		//TODO: make this add cards

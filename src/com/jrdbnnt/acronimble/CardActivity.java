@@ -32,7 +32,7 @@ public class CardActivity extends Activity implements View.OnClickListener {
 	private Button bSubmit;
 	
 	private ArrayList<String> usedCards;
-		
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
